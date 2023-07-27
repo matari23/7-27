@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style type="text/css">
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        :root {
+            --clock-color: #212121;
+            --primary-color: #e53935;
+            --shadow-color: #0e0e0e;
+            /* animation time */
+            --s-animation-time: 10s;
+            --m-animation-time: 60s;
+            --h-animation-time: 20s;
+
+              /* real time second */
+            --s-rotate-time : 60s;
+            --m-rotate-time : 3600s;
+            --h-rotate-time : 43200s;
+            /* rotate from */
+            --s-rotate-from:0deg;
+            --m-rotate-from:0deg;
+            --h-rotate-from:0deg;
+            /* rotate to */
+            --s-rotate-to:0deg;
+            --m-rotate-to:0deg;
+            --h-rotate-to:0deg;
+
+        }
+
+        html {
+            height: 100vh;
+        }
+
+        body {
+            min-height: 100vh;
+            font-size: 1.4rem;
+            text-shadow: 0 0 0.1rem var(--clock-color);
+            background-color: var(--primary-color);
+        }
+
+        section {
+            background-color: var(--clock-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10rem;
+            position: relative;
+        }
+
+        section.animation {}
+
+        section.animation::before,
+        section.working::before {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        section.animation::before {
+            content: "Animated time  ↑ ";
+            bottom: 1.5rem;
+        }
+        
+        section.working::before {
+            content: "Real time ↓";
+            top: 1.5rem;
+        }
+
+        .clock,
+        .clock_top,
+        .clock_center,
+        .hours_pointer {
+            border-radius: 50%;
+        }
+        .clock_top,
+        .hours_container,
+        .hours_pointer{width: 100%;height: 100%;}
+
+        .clock {
+            height: 45rem;
+            width: 45rem;
+            min-height: 45rem;
+            min-width: 45rem;
+            background-color: var(--clock-color);
+            box-shadow: 1rem 0 0.5rem var(--shadow-color);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .clock_center {
+            height: 100%;
+            width: 100%;
+            background-color: var(--primary-color);
+            box-shadow: 0.4rem 0 0.8rem var(--shadow-color);
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            grid-template-areas:
+                ". . . n12 . . ."
+                ". . n11 . n1 . ."
+                ". n10 . . . n2 ."
+                "n9 . . . . . n3"
+                ". n8 . . . n4 ."
+                ". . n7 . n5 . ."
+                ". . . n6 . . .";
+            /* border: 1px solid #fff; */
+        }
+
+        .number {
+            font-size: 3.2rem;
+            color: var(--clock-color);
+            line-height: 1;
+            align-self: center;
+            justify-self: center;
+            /* border: 1px solid #fff; */
+        }
+
+        .number_12 {
+            grid-area: n12;
+            align-self: end;
+        }
+
+        .number_11 {
+            grid-area: n11;
+            justify-self: start;
+            align-self: start;
+        }
+
+        .number_10 {
+            grid-area: n10;
+            justify-self: start;
+            align-self: start;
+        }
+
+        .number_9 {
+            grid-area: n9;
+            justify-self: end;
+        }
+
+        .number_8 {
+            grid-area: n8;
+            justify-self: start;
+            align-self: end;
+        }
+
+        .number_7 {
+            grid-area: n7;
+            justify-self: start;
+            align-self: end;
+        }
+
+        .number_6 {
+            grid-area: n6;
+            justify-self: start;
+        }
+
+        .number_5 {
+            grid-area: n5;
+            justify-self: end;
+            align-self: end;
+        }
+
+        .number_4 {
+            grid-area: n4;
+            justify-self: end;
+            align-self: end;
+        }
+
+        .number_3 {
+            grid-area: n3;
+            justify-self: start;
+        }
+
+        .number_2 {
+            grid-area: n2;
+            justify-self: end;
+            align-self: start;
+        }
+
+        .number_1 {
+            grid-area: n1;
+            justify-self: end;
+            align-self: start;
+        }
+
+        .clock_top {
+            position: absolute;
+            left: 0;
+            top: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hours_container {
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0.1rem 0 0.6rem var(--shadow-color));
+        }
+
+        .hours_pointer {
+            background-color: var(--clock-color);
+            clip-path: polygon(-10% -10%,
+                    32% -10%,
+                    50% 50%,
+                    68% -10%,
+                    110% -10%,
+                    110% 110%,
+                    -10% 110%);
+        }
+
+        .sec_min_container {
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--clock-color);
+            box-shadow: 0 0.1rem 1rem var(--shadow-color);
+            border-radius: 50%;
+            z-index: 2;
+            position: absolute;
+        }
+
+        .min_container,
+        .sec_container {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .min_pointer {
+            position: absolute;
+            background-color: #fff;
+            width: 0.2rem;
+            height: 14rem;
+            border-radius: 0.15rem;
+            bottom: -1.5rem;
+            box-shadow: 0.4rem 0.1rem 0.8rem var(--shadow-color);
+            z-index: 0;
+        }
+
+        .sec_pointer {
+            position: absolute;
+            bottom: -4rem;
+            background-color: var(--primary-color);
+            width: 0.2rem;
+            height: 22rem;
+            box-shadow: 0 0.1rem 0.1rem var(--shadow-color);
+            border-radius: 0.1rem;
+        }
+        .sec_container::before{
+            content: "";
+            position: absolute;
+            height: 0.4rem;
+            width: 0.4rem;
+            border-radius: 50%;
+            background-color: var(--clock-color);
+            z-index: 2;
+        }
+        .sec_container::after{
+            content: "";
+            position: absolute;
+            height: 1.2rem;
+            width: 1.2rem;
+            border:0.2rem solid var(--primary-color);
+            border-radius: 50%;
+            background-color: #fff;
+            z-index: 1;
+        }
+
+        /* animation */
+        .animation .sec_container{
+            animation: ani_seconds var(--s-animation-time)  infinite linear;
+        }
+        .animation .min_container{
+            animation: ani_seconds var(--m-animation-time) infinite linear;
+        }
+        .animation .hours_pointer{
+            animation: ani_pointer var(--h-animation-time) infinite linear;
+        }
+
+        @keyframes ani_seconds {
+            100%{transform: rotateZ(360deg);}
+        }
+        @keyframes ani_pointer {
+            100%{
+                transform: rotateZ(360deg);
+            }            
+        }
+        .working .sec_container{
+            animation: rotate_seconds var(--s-rotate-time) infinite linear;
+        }
+        .working .min_container{
+            animation: rotate_seconds var(--m-rotate-time) infinite linear;
+        }
+        .working .hours_pointer{
+            animation: rotate_seconds var(--h-rotate-time) infinite linear;
+        }
+
+        @keyframes rotate_seconds {
+            from{transform: rotateZ(var(--s-rotate-from));}
+            to{transform: rotateZ(var(--s-rotate-to));}
+        }
+
+        @keyframes rotate_minutes {
+            from{transform: rotateZ(var(--m-rotate-from));}
+            to{transform: rotateZ(var(--m-rotate-to));}
+        }
+        @keyframes rotate_hours {
+            from{transform: rotateZ(var(--h-rotate-from));}
+            to{transform: rotateZ(var(--h-rotate-to));}
+        }
+    </style>
+</head>
+
+<body>
+    <section class="animation">
+        <div class="clock">
+            <div class="clock_top">
+                <div class="sec_min_container">
+
+                    <div class="min_container">
+                        <div class="min_pointer"></div>
+                    </div><!-- min_container -->
+
+                    <div class="sec_container">
+                        <div class="sec_pointer"></div>
+                    </div><!-- sec_container -->
+                </div><!-- sec_min_container -->
+
+                <div class="hours_container">
+                    <div class="hours_pointer"></div>
+                </div><!-- clock_container -->
+
+            </div><!-- clock_top -->
+
+            <div class="clock_center">
+                <span class="number number_1">01</span>
+                <span class="number number_2">02</span>
+                <span class="number number_3">03</span>
+                <span class="number number_4">04</span>
+                <span class="number number_5">05</span>
+                <span class="number number_6">06</span>
+                <span class="number number_7">07</span>
+                <span class="number number_8">08</span>
+                <span class="number number_9">09</span>
+                <span class="number number_10">10</span>
+                <span class="number number_11">11</span>
+                <span class="number number_12">12</span>
+            </div><!-- clock_center -->
+
+        </div><!-- clock -->
+    </section><!-- animation -->
+
+    <section class="working">
+
+        <div class="clock">
+            <div class="clock_top">
+                <div class="sec_min_container">
+
+                    <div class="min_container">
+                        <div class="min_pointer"></div>
+                    </div><!-- min_container -->
+
+                    <div class="sec_container">
+                        <div class="sec_pointer"></div>
+                    </div><!-- sec_container -->
+                </div><!-- sec_min_container -->
+
+                <div class="hours_container">
+                    <div class="hours_pointer"></div>
+                </div><!-- clock_container -->
+
+            </div><!-- clock_top -->
+
+            <div class="clock_center">
+                <span class="number number_1">01</span>
+                <span class="number number_2">02</span>
+                <span class="number number_3">03</span>
+                <span class="number number_4">04</span>
+                <span class="number number_5">05</span>
+                <span class="number number_6">06</span>
+                <span class="number number_7">07</span>
+                <span class="number number_8">08</span>
+                <span class="number number_9">09</span>
+                <span class="number number_10">10</span>
+                <span class="number number_11">11</span>
+                <span class="number number_12">12</span>
+            </div><!-- clock_center -->
+
+        </div><!-- clock -->
+
+    </section><!-- working -->
+    <script lang="java">
+
+        const d = new Date();
+        console.log(d);
+
+        // const convertedSeconds = ((d.getSeconds()))
+        // seconds =d.getSeconds();
+        // console.log(seconds);
+        // minutes = d.getMinutes();
+        // console.log(minutes);
+        const convertedSeconds = ((d.getSeconds()+d.getMilliseconds()/1000)/60)*360
+        const convertedMinutes = (d.getMinutes()/60)*360
+        const convertedHours = ((d.getHours() + d.getMinutes()/60)/12)*360
+
+        //rotate to
+        const totateSecondsTo = convertedSeconds + 360;
+        const totateMinutesTo = convertedMinutes + 360;
+        const totateHoursTo = convertedHours + 360;
+        //update to
+        const root = document.documentElement;
+        root.style.setProperty("--s-rotate-from",convertedSeconds +"deg" )
+        root.style.setProperty("--m-rotate-from",convertedMinutes +"deg" )
+        root.style.setProperty("--h-rotate-from",convertedHours +"deg" )
+        root.style.setProperty("--s-rotate-to",totateSecondsTo +"deg" )
+        root.style.setProperty("--m-rotate-to",totateMinutesTo +"deg" )
+        root.style.setProperty("--h-rotate-to",totateHoursTo +"deg" )
+    </script>
+</body>
+
+</html>
